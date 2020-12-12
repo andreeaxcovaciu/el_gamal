@@ -11,6 +11,7 @@ import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.plaf.BorderUIResource;
 
 
 class MyKeyListener_  implements KeyListener {
@@ -76,6 +77,7 @@ class ElGamal extends JFrame implements ActionListener {
     //3rd panel
     private JTextArea textAreaChat;
     private JScrollPane scrollPanel;
+    private JButton clearChat;
 
     private List<BigInteger> intList= new ArrayList<BigInteger>();
 
@@ -96,7 +98,7 @@ class ElGamal extends JFrame implements ActionListener {
 
         jPanel3 = new JPanel();
        // jPanel3.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        jPanel3.setPreferredSize(new java.awt.Dimension(150, 300));
+        jPanel3.setPreferredSize(new java.awt.Dimension(150, 280));
         jPanel3.setBorder(BorderFactory.createLineBorder(Color.black));
         jPanel3.setBackground(new Color(0, 0, 0));
         //Layout
@@ -305,6 +307,32 @@ class ElGamal extends JFrame implements ActionListener {
         scrollPanel.setVisible(false);
         jPanel3.add(scrollPanel);
 
+
+        clearChat = new JButton("  Clear Chat  ");
+        clearChat.setVisible(false);
+        clearChat.addActionListener(new ActionListener(){
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                textAreaChat.setText("");
+            }
+        });
+        clearChat.setBorder(BorderFactory.createLineBorder(Color.black));
+        clearChat.setBackground(new Color(255,255,255));
+        jPanel3.add(clearChat);
+
+
+        //MENU
+        //JMenu menu;
+        JMenu i1, i2, i3;
+        JMenuBar mb=new JMenuBar();
+        //menu=new JMenu();
+        i1=new JMenu("Instructions");
+        i2=new JMenu("About");
+       // i3=new JMenu("Item 3");
+        mb.add(i1);   mb.add(i2);  // mb.add(i3);
+        this.setJMenuBar(mb);
+
         //ACTIONS
 
         buttonComputePrimeB.addActionListener(new ActionListener() {
@@ -322,8 +350,13 @@ class ElGamal extends JFrame implements ActionListener {
                 if (checkPrime.isSelected()){
                     tfB.setEditable(false);
                     tfB.setText(checkPr());
+                    buttonComputePrimeB.setVisible(false);
+                    buttonPublishKeysB.setVisible(true);
                 }
-                else if (!checkPrime.isSelected()){tfB.setEditable(true);}
+                else if (!checkPrime.isSelected()){tfB.setEditable(true);
+                    buttonPublishKeysB.setVisible(false);
+                    buttonComputePrimeB.setVisible(true);
+                }
             }
         });
         buttonPublishKeysB.addActionListener(new ActionListener() {
@@ -351,40 +384,44 @@ class ElGamal extends JFrame implements ActionListener {
         buttonSendMessage.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                List<BigInteger> list;
-                BigInteger m = BigInteger.valueOf(Long.parseLong(textfieldMessage.getText()));
-                int m1= m.compareTo(intList.get(0));
-                int m2 = m.compareTo(BigInteger.valueOf(0));
-                if ((m2 == 0) || (m2 == -1) || (m1 == 0) || (m1 == 1)) {textfieldMessage.setText("0"); sendTxtArea.setVisible(true); }
-                else {sendTxtArea.setVisible(false);
-                    list = cripting(textfieldMessage,intList);
+                try {
+                    List<BigInteger> list;
+                    BigInteger m = BigInteger.valueOf(Long.parseLong(textfieldMessage.getText()));
+                    int m1 = m.compareTo(intList.get(0));
+                    int m2 = m.compareTo(BigInteger.valueOf(0));
+                    if ((m2 == 0) || (m2 == -1) || (m1 == 0) || (m1 == 1)) {
+                        textfieldMessage.setText("0");
+                        sendTxtArea.setVisible(true);
+                    } else {
+                        sendTxtArea.setVisible(false);
+                        list = cripting(textfieldMessage, intList);
 
-                    if (alice == true){
-                    textAreaPanel3.setText(aliceORbob.getText() + " is sending the cripted message...\n\n" +
-                            aliceORbob.getText() + "'s cripted message: " +
-                            "\nC = (C1,C2): (" + list.get(0)+ "," + list.get(1) + ")" +
-                            "\nk : " + list.get(2));}
-                    else if (bob == true) {
-                        textAreaPanel3.setText(aliceORbob.getText() + " is sending the cripted message...\n\n" +
-                                aliceORbob.getText() + "'s cripted message: " +
-                                "\nC = (C1,C2): (" + list.get(0)+ "," + list.get(1) + ")" +
-                                "\nk : " + list.get(2));}
+                        if (alice == true) {
+                            textAreaPanel3.setText(aliceORbob.getText() + " is sending the cripted message...\n\n" +
+                                    aliceORbob.getText() + "'s cripted message: " +
+                                    "\nC = (C1,C2): (" + list.get(0) + "," + list.get(1) + ")" +
+                                    "\nk : " + list.get(2));
+                        } else if (bob == true) {
+                            textAreaPanel3.setText(aliceORbob.getText() + " is sending the cripted message...\n\n" +
+                                    aliceORbob.getText() + "'s cripted message: " +
+                                    "\nC = (C1,C2): (" + list.get(0) + "," + list.get(1) + ")" +
+                                    "\nk : " + list.get(2));
+                        }
 
-                   BigInteger message  ;
-                    message = decript(list, intList);
-                    if (alice == true){
+                        BigInteger message;
+                        message = decript(list, intList);
+                        if (alice == true) {
+                            textAreaChat.setText(textAreaChat.getText() + "\n" + aliceORbob.getText() + ":" + message);
+                        } else if (bob == true) {
+                            textAreaChat.setText(textAreaChat.getText() + "\n" + aliceORbob.getText() + ":" + message);
+                        }
 
-                        textAreaChat.setText(textAreaChat.getText() + "\n"+ "<html><font color=\"red\">"+ aliceORbob.getText() + "</font></html>:" + message);
                     }
-                    else if (bob == true){
-
-                        textAreaChat.setText(textAreaChat.getText() + "\n"+ aliceORbob.getText() + ":" + message);
-                    }
-
-                }
 
 
-            }});
+                }catch(NumberFormatException ex){}
+            }
+        });
 
 
 
@@ -451,6 +488,7 @@ class ElGamal extends JFrame implements ActionListener {
         textAreaPanel2.setVisible(true);
         labelInfos.setVisible(true);
         scrollPanel.setVisible(true);
+        clearChat.setVisible(true);
     }
 
     protected void itemAliceORBob(ItemEvent ie){
@@ -479,6 +517,7 @@ class ElGamal extends JFrame implements ActionListener {
             textAreaPanel3.setText("Waiting for " + aliceORbob.getText() + "\n        to send the message...");
             alice = true;
             bob = false;
+            textfieldMessage.setText("");
 
         }
         else {
@@ -496,12 +535,12 @@ class ElGamal extends JFrame implements ActionListener {
             textfieldMessage.setBounds(labelMessage.getX(), tfB.getY(), 150, 25);
             buttonSendMessage.setBounds(labelMessage.getX(), buttonPublishKeysB.getY(), 100, 25);
 
-            //labelprimeB.setBounds(checkPrime.getX() + 30, checkPrime.getY(), 180, 35);
             sendTxtArea.setBounds(textfieldMessage.getX(), textfieldMessage.getY() + 30, 180, 35);
             textAreaPanel2.setText("Waiting for Alice\n        to send cripting details...");
             textAreaPanel3.setText("Waiting for " + aliceORbob.getText() + "\n        to send the message...");
             alice = false;
             bob = true;
+            textfieldMessage.setText("");
 
         }
     }
@@ -551,9 +590,6 @@ class ElGamal extends JFrame implements ActionListener {
             o = 1;
         }
 
-        for (int y = 0; y < z; y++) {
-            System.out.print(roots.get(y) + ", ");
-        }
         return roots;
     }
 
@@ -570,19 +606,13 @@ class ElGamal extends JFrame implements ActionListener {
             q = BigInteger.valueOf(Long.parseLong(txtText.getText()));
 
             int max = q.intValue() - 1;
-            System.out.println("qx=" + q);
-            //int max = 50;
             s = (long) (Math.random() * (max - min + 1) + min);
-            // s1 = 2;
-            System.out.println("s=" + s);
             array = try100(q);
 
             alpha = array.get((int) (Math.random() * (array.size()- min -2 ) + min));
 
-            System.out.println("a=" + alpha);
             BigInteger h1p = power(alpha,s);
             h =h1p.mod(q);
-            System.out.println("h=" + h);
             list.add( q);
             list.add( BigInteger.valueOf(s));
             list.add(alpha);
@@ -604,51 +634,35 @@ class ElGamal extends JFrame implements ActionListener {
             int max = listC.get(0).intValue() - 1;
 
             k = BigInteger.valueOf((long) (Math.random() * max + 1));
-            System.out.println("k= " +k );
             BigInteger c11p = power(listC.get(2),k.longValue());
             c11 = c11p.mod(listC.get(0));
 
             BigInteger c12p = power(listC.get(3),k.longValue());
-
-            System.out.println("c12p=" + c12p);
-
-            System.out.println("m=" + m);
             BigInteger c12pp = m.multiply(c12p);
-            System.out.println("c12pp " + c12pp);
             c12 =c12pp.mod(listC.get(0));
 
             list.add(c11);
             list.add(c12);
             list.add(k);
         }catch(NumberFormatException | IndexOutOfBoundsException e ){}
-        System.out.println("c1,c2:" +list);
         return list;
     }
 
 
 
     public BigInteger decript(List<BigInteger> list, List<BigInteger> list2){
-        System.out.println("c1 =" + list2.get(0) + "; c2=" + list2.get(1) + "; q = " + list.get(0) + " s=" + list.get(1));
         BigInteger c1 = list.get(0);
         BigInteger c2 = list.get(1);
         BigInteger q =  list2.get(0);
         BigInteger s = list2.get(1);
         BigInteger m ;
         BigInteger intermidiator = power(c1,s.longValue());
-        System.out.println("intermidiator: " + intermidiator);
 
         BigInteger intermidiator2 = intermidiator.mod(q);
-        System.out.println("intermidiator2: " + intermidiator2);
 
         BigInteger intermidiator3 = power(intermidiator2, (q.longValue()-2));
-        System.out.println("intermidiator3: " + intermidiator3);
         BigInteger mp = c2.multiply(intermidiator3);
         m =mp.mod(q);
-        System.out.println("list =" +list + "\nlist2 ="+list2);
-        System.out.println("mD: " + m );
-        //int compare = m.compareTo(BigInteger.valueOf(122));
-
-       // if( compare != 0) {System.out.println("NU E DECRIPTAT COREEEEEEEEECT!!!!!!!!!!!!!!!!!");};
         return m;
     }
 
